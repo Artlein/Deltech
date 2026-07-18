@@ -1,0 +1,41 @@
+name: Deploy to AWS EC2
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Execute Remote SSH Commands
+        uses: appleboy/ssh-action@master
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ubuntu
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd /home/ubuntu/deltech
+            
+            # Fetch latest repository version
+            git pull origin main
+            
+            # Terminate running app if active
+            pkill -f 'deltech-backend' || true
+            
+            # Build and deploy frontend static files
+            cd frontend
+            npm install
+            npm run build
+            mkdir -p ../backend/src/main/resources/static/
+            cp -r dist/* ../backend/src/main/resources/static/
+            
+            # Package and run Spring Boot backend
+            cd ../backend
+            mvn clean package -DskipTests
+            nohup java -jar target/deltech-backend-1.0.0.jar > app.log 2>&1 &

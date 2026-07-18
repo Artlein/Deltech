@@ -1,0 +1,18 @@
+# Java/Maven Build outputs
+backend/target/
+backend/*.log
+backend/.metadata/
+
+# Node/React outputs
+frontend/node_modules/
+frontend/dist/
+frontend/*.log
+
+# IDE specific settings
+.lh/
+.idea/
+*.iml
+.vscode/
+.DS_Store
+*.swp
+
